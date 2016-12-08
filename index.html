@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+    <head>
+        <title>Flickr API Carousel</title>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <link href="https://fonts.googleapis.com/css?family=EB+Garamond" rel="stylesheet">
+
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                font-family: 'EB Garamond', serif;
+            }
+
+            html {
+                box-sizing: border-box;
+            }
+
+            body {
+                background-color: rgba(0,0,0,0.5);
+            }
+
+            *, *:before, *:after {
+                box-sizing: inherit;
+            }
+
+            a {
+                color: white;
+                text-decoration: none;
+            }
+
+            a:hover {
+                text-decoration: underline;
+            }
+
+
+            .carousel-box {
+                height: 100%;
+                overflow: hidden;
+            }
+
+            .action-buttons {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                position: absolute;
+                top: calc(50% - 100px);
+                z-index: 1;
+                opacity: .1;
+                transition: opacity .25s ease;
+            }
+
+            .carousel-box:hover .action-buttons {
+                opacity: 1;
+            }
+
+            .action-buttons button {
+                border: none;
+                font-size: 50px;
+                padding: 0 10px;
+                display: block;
+                background-color: rgba(255,255,255,.5);
+                height: 1.2em;
+                line-height: 1;
+            }
+
+            .action-buttons button:hover {
+                cursor: pointer;
+            }
+
+            .carousel-content {
+                height: 100%;
+                display: flex;
+                align-items: center;
+            }
+
+            [data-function="slide"] {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                text-align: center;
+                opacity: 0;
+                transition: opacity .25s ease;
+                display: flex;
+                align-items: flex-end;
+            }
+
+            [data-function="slide"] p {
+                letter-spacing: 3px;
+                padding: 1rem 40px;
+                width: 100%;
+                color: white;
+                font-size: 2.5rem;
+                z-index: 10;
+                margin: 0 auto;
+                background-color: rgba(0,0,0,0.3);
+            }
+
+            .carousel-content img {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: -90%;
+                right: 0;
+                height: 100%;
+                overflow: auto;
+            }
+
+            [data-function="slide"].current-slide {
+                opacity: 1;
+            }
+
+            .album-info {
+                color: white;
+                position: absolute;
+                background-color: rgba(0,0,0,0.3);
+                font-size: 1rem;
+                z-index: 10;
+                width: 100%;
+                padding: 1rem;
+            }
+
+            .album-info > a {
+                margin-right: 1rem;
+                padding-right: 1rem;
+                border-right: 1px solid white;
+            }
+
+            @media screen and (min-width: 568px) {
+                .carousel-content img {
+                    left: 0;
+                    width: 100%;
+                    overflow: auto;
+                }
+            }
+
+            @media screen and (min-width: 768px) {
+                .action-buttons button {
+                    font-size: 100px;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="carousel-box" id="carouselBox">
+            <div class="action-buttons">
+                <button class="prev" aria-hidden="true" tabindex="-1" title="use left arrow key">
+                    &#10094;
+                </button>
+                <button class="next" aria-hidden="true" tabindex="-1" title="use right arrow key">
+                    &#10095;
+                </button>
+            </div>
+            <div class="album-info">
+                <a id="albumLink" target="_blank"><span id="albumInfo"></span></a>
+                <span>Photos by <a id="albumOwnerLink" target="_blank"><span id="owner"></span></a></span>
+            </div>
+            <div class="carousel-content" id="carouselContent"></div>
+        </div>
+
+        <script type="text/javascript">
+
+            // Flickr configurations
+            // Obfuscated API key var for demo
+            var _0x6e6e=["\x65\x66\x63\x38\x33\x64\x63\x63\x64\x37\x63\x31\x64\x30\x61\x65\x39\x33\x66\x34\x61\x61\x37\x61\x66\x62\x39\x37\x31\x66\x63\x65"];var apiKey=_0x6e6e[0]
+
+            // To personalize app, replace with your own API key
+            // var apiKey = '';
+
+            var album = '72157640788052915',
+                albumOwner = '13639387%40N05',
+                flickrUrl = 'https://api.flickr.com/services/rest/',
+                method = '?method=flickr.photosets.getPhotos&api_key=',
+                perPage = '20',
+                formatCallback = '&format=json&nojsoncallback=1',
+                contentContainer = document.getElementById('carouselContent'),
+                oReq = new XMLHttpRequest();
+
+            // Handle a response from the Flickr API
+            function reqListener () {
+                var flickrPhotos = JSON.parse(this.responseText);
+
+                console.log(flickrPhotos.photoset);
+
+                // Parse response for album and owner information
+                var ownerName = flickrPhotos.photoset.ownername,
+                    albumTitle = flickrPhotos.photoset.title,
+                    albumUrl = 'https://www.flickr.com/photos/' + albumOwner + '/albums/' + album;
+                    albumOwnerUrl = 'https://www.flickr.com/photos/' + albumOwner;
+
+                // append response data to HTML DOM elements
+                albumInfo.innerHTML = albumTitle;
+                owner.innerHTML = ownerName;
+                albumLink.href = albumUrl;
+                albumOwnerLink.href = albumOwnerUrl;
+
+                // Iterate through flickrPhotos in the response
+                flickrPhotos.photoset.photo.forEach(function(foto) {
+                    // Generate the URL for individual photo based on template
+                    var url = 'https://farm' + foto.farm + '.staticflickr.com/' + foto.server + '/' + foto.id + '_' + foto.secret + '.jpg';
+                    var photoTitle = foto.title;
+
+                    // Generate the necessary slide markup
+                    //   <span data-function="slide">
+                    //       <p>title</p>
+                    //       <img src="" />
+                    //   </span>
+                    var span = document.createElement('span'),
+                        img = document.createElement('img'),
+                        title = document.createElement('p');
+
+                    // append response data to generated HTML DOM elements
+                    img.src = url;
+                    img.alt = photoTitle;
+                    title.innerHTML = photoTitle;
+                    span.dataset.function = 'slide';
+                    span.appendChild(title);
+                    span.appendChild(img);
+
+                    // Now append the new slide to the slide container
+                    contentContainer.appendChild(span);
+                });
+
+                // Remote API request has been made and processed, initialize the carousel.
+                flickrCarousel();
+            }
+
+            // API call to Flickr
+            oReq.addEventListener("load", reqListener);
+            oReq.open("GET", flickrUrl + method + apiKey + '&photoset_id=' + album + '&user_id=' + albumOwner + '&per_page=' + perPage + formatCallback);
+            oReq.send();
+
+            // Carousel function
+            function flickrCarousel () {
+
+                // set scoped variables
+                var carouselBox = document.getElementById('carouselBox'),
+                    prev = carouselBox.querySelector('.prev'),
+                    next = carouselBox.querySelector('.next'),
+                    slide = 0,
+                    slides = carouselBox.querySelectorAll('[data-function=slide]'),
+                    deck = slides.length,
+                    currentSlide = slides[0];
+
+                // Find current slide of array and add selector
+                currentSlide.classList.add('current-slide');
+
+                // slider function
+                function pushSlide(flip) {
+
+                    // Use value of array to find node and remove selector
+                    currentSlide.classList.remove('current-slide');
+
+                    // Using value of current slide, add flip value to determine next slide value
+                    slide = slide + flip;
+
+                    // allows for full rotation of carousel; if 0 set value to -1 of array length
+                    if (flip === -1 && slide < 0) {
+                        slide = deck - 1;
+                    }
+
+                    // allows for full rotation of carousel; if max length of array, set to 0
+                    if (flip === 1 && !slides[slide]) {
+                        slide = 0;
+                    }
+
+                    // determine active slide and add selector
+                    currentSlide = slides[slide];
+                    currentSlide.classList.add('current-slide');
+                }
+
+                // Bind click events to toggle buttons and pass in slide flip value
+                next.addEventListener('click', function() {
+                    pushSlide(1);
+                });
+
+                prev.addEventListener('click', function() {
+                    pushSlide(-1);
+                });
+
+                // Bind keyboard events to slide triggers
+                document.addEventListener('keydown', function(e) {
+                    if( e.keyCode == 39 ) {
+                        pushSlide(1);
+                    }
+                    if( e.keyCode == 37 ) {
+                        pushSlide(-1);
+                    }
+                });
+            };
+        </script>
+    </body>
+</html>
