@@ -166,12 +166,12 @@
 
             // Flickr configurations
             // Obfuscated API key var for demo
-            var _0x6e6e=["\x65\x66\x63\x38\x33\x64\x63\x63\x64\x37\x63\x31\x64\x30\x61\x65\x39\x33\x66\x34\x61\x61\x37\x61\x66\x62\x39\x37\x31\x66\x63\x65"];var apiKey=_0x6e6e[0]
+            const _0x6e6e=["\x65\x66\x63\x38\x33\x64\x63\x63\x64\x37\x63\x31\x64\x30\x61\x65\x39\x33\x66\x34\x61\x61\x37\x61\x66\x62\x39\x37\x31\x66\x63\x65"];const apiKey=_0x6e6e[0]
 
             // To personalize app, replace with your own API key
-            // var apiKey = '';
+            // const apiKey = '';
 
-            var album = '72157640788052915',
+            const album = '72157640788052915',
                 albumOwner = '13639387%40N05',
                 flickrUrl = 'https://api.flickr.com/services/rest/',
                 method = '?method=flickr.photosets.getPhotos&api_key=',
@@ -182,14 +182,14 @@
 
             // Handle a response from the Flickr API
             function reqListener () {
-                var flickrPhotos = JSON.parse(this.responseText);
+                const flickrPhotos = JSON.parse(this.responseText);
 
                 console.log(flickrPhotos.photoset);
 
                 // Parse response for album and owner information
-                var ownerName = flickrPhotos.photoset.ownername,
+                const ownerName = flickrPhotos.photoset.ownername,
                     albumTitle = flickrPhotos.photoset.title,
-                    albumUrl = 'https://www.flickr.com/photos/' + albumOwner + '/albums/' + album;
+                    albumUrl = 'https://www.flickr.com/photos/' + albumOwner + '/albums/' + album,
                     albumOwnerUrl = 'https://www.flickr.com/photos/' + albumOwner;
 
                 // append response data to HTML DOM elements
@@ -201,15 +201,15 @@
                 // Iterate through flickrPhotos in the response
                 flickrPhotos.photoset.photo.forEach(function(foto) {
                     // Generate the URL for individual photo based on template
-                    var url = 'https://farm' + foto.farm + '.staticflickr.com/' + foto.server + '/' + foto.id + '_' + foto.secret + '.jpg';
-                    var photoTitle = foto.title;
+                    const url = 'https://farm' + foto.farm + '.staticflickr.com/' + foto.server + '/' + foto.id + '_' + foto.secret + '.jpg';
+                    const photoTitle = foto.title;
 
                     // Generate the necessary slide markup
                     //   <span data-function="slide">
                     //       <p>title</p>
                     //       <img src="" />
                     //   </span>
-                    var span = document.createElement('span'),
+                    const span = document.createElement('span'),
                         img = document.createElement('img'),
                         title = document.createElement('p');
 
@@ -238,12 +238,13 @@
             function flickrCarousel () {
 
                 // set scoped variables
-                var carouselBox = document.getElementById('carouselBox'),
+                const carouselBox = document.getElementById('carouselBox'),
                     prev = carouselBox.querySelector('.prev'),
                     next = carouselBox.querySelector('.next'),
-                    slide = 0,
                     slides = carouselBox.querySelectorAll('[data-function=slide]'),
-                    deck = slides.length,
+                    deck = slides.length;
+
+                let slide = 0,
                     currentSlide = slides[0];
 
                 // Find current slide of array and add selector
@@ -274,20 +275,20 @@
                 }
 
                 // Bind click events to toggle buttons and pass in slide flip value
-                next.addEventListener('click', function() {
+                next.addEventListener('click', () => {
                     pushSlide(1);
                 });
 
-                prev.addEventListener('click', function() {
+                prev.addEventListener('click', () => {
                     pushSlide(-1);
                 });
 
                 // Bind keyboard events to slide triggers
-                document.addEventListener('keydown', function(e) {
-                    if( e.keyCode == 39 ) {
+                document.addEventListener('keydown', event => {
+                    if( event.keyCode == 39 ) {
                         pushSlide(1);
                     }
-                    if( e.keyCode == 37 ) {
+                    if( event.keyCode == 37 ) {
                         pushSlide(-1);
                     }
                 });

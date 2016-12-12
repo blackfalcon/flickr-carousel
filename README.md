@@ -31,3 +31,7 @@ depending on your OS or Python version.
 ### Example screen shot
 
 ![ImgurExample](http://i.imgur.com/m3NvpIz.png)
+
+### ES6
+
+The second commit to this demo updates the JavaScript to be ES6 compatible. Sorry IE 11, but I'm not sorry. If you are interested in the ES5 version, please see the `initial commit` or checkout [babeljs.io](https://babeljs.io/repl/) to convert back to ES5.
